@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ROBO — Autonomous Rides, Delivered to You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          cyan: '#00e5ff',
+          blue: '#0066ff',
+          violet: '#7c3aed',
+          dark: '#05060a',
+          card: '#0d0f17',
+          line: '#1a1d2e'
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        display: ['"Space Grotesk"', 'sans-serif']
+      },
+      animation: {
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'glow': 'glow 3s ease-in-out infinite alternate',
+        'slide-up': 'slideUp 0.8s ease-out forwards',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' }
+        },
+        glow: {
+          '0%': { boxShadow: '0 0 20px rgba(0, 229, 255, 0.3)' },
+          '100%': { boxShadow: '0 0 40px rgba(0, 229, 255, 0.6)' }
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(30px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+  * { -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #05060a;
+    color: #e5e7eb;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+  .font-display { font-family: 'Space Grotesk', sans-serif; }
+  .gradient-text {
+    background: linear-gradient(135deg, #00e5ff 0%, #0066ff 50%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .glass {
+    background: rgba(13, 15, 23, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .glass-card {
+    background: linear-gradient(145deg, rgba(20,24,38,0.7) 0%, rgba(13,15,23,0.9) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .glass-card:hover {
+    border-color: rgba(0, 229, 255, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px -20px rgba(0, 229, 255, 0.15);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #00e5ff 0%, #0066ff 100%);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+  }
+  .btn-primary:hover::before { left: 100%; }
+  .btn-primary:hover {
+    box-shadow: 0 10px 40px -10px rgba(0, 229, 255, 0.5);
+    transform: translateY(-2px);
+  }
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .radial-glow {
+    background: radial-gradient(circle at center, rgba(0, 229, 255, 0.15) 0%, transparent 70%);
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .nav-link {
+    position: relative;
+    transition: color 0.3s;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 2px;
+    background: linear-gradient(90deg, #00e5ff, #0066ff);
+    transition: width 0.3s;
+  }
+  .nav-link:hover::after { width: 100%; }
+  .nav-link:hover { color: #00e5ff; }
+  .scroll-indicator {
+    animation: scrollBounce 2s ease-in-out infinite;
+  }
+  @keyframes scrollBounce {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(10px); opacity: 0.5; }
+  }
+  .pulse-dot {
+    animation: pulseDot 2s ease-in-out infinite;
+  }
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+  }
+  .ticker {
+    animation: ticker 30s linear infinite;
+  }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(5,6,10,0.3) 0%, rgba(5,6,10,0.8) 70%, #05060a 100%);
+  }
+  .city-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(5,6,10,0.7) 0%, rgba(5,6,10,0.4) 100%);
+  }
+  input:focus, button:focus { outline: none; }
+  .counter { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      <a href="#" class="flex items-center gap-2 group">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-cyan to-brand-blue flex items-center justify-center">
+          <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <span class="font-display font-bold text-xl tracking-tight">ROBO</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#how" class="nav-link text-sm font-medium text-gray-300">How it works</a>
+        <a href="#fleet" class="nav-link text-sm font-medium text-gray-300">Fleet</a>
+        <a href="#safety" class="nav-link text-sm font-medium text-gray-300">Safety</a>
+        <a href="#cities" class="nav-link text-sm font-medium text-gray-300">Cities</a>
+        <a href="#about" class="nav-link text-sm font-medium text-gray-300">About</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="hidden sm:block text-sm font-medium text-gray-300 hover:text-white transition">Sign in</button>
+        <button class="btn-primary px-5 py-2.5 rounded-full text-sm font-semibold text-black">Book a ride</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="relative min-h-screen flex items-center overflow-hidden">
+  <div class="absolute inset-0 hero-bg">
+    <img src="https://image.qwenlm.ai/public_source/29b2177f-d67e-4f1d-bd41-6da4068c1f21/1e46ca3da-a22e-4dc1-a551-711f56fac759.png" alt="" class="w-full h-full object-cover" />
+  </div>
+  <div class="absolute inset-0 grid-bg opacity-40"></div>
+  <div class="absolute top-1/4 left-1/4 w-96 h-96 radial-glow blur-3xl"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-8 pt-32 pb-20 w-full">
+    <div class="grid lg:grid-cols-12 gap-12 items-center">
+      <div class="lg:col-span-7">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass mb-6">
+          <span class="w-2 h-2 rounded-full bg-brand-cyan pulse-dot"></span>
+          <span class="text-xs font-medium text-gray-300">Now serving 12 cities worldwide</span>
+        </div>
+        <h1 class="font-display font-bold text-5xl sm:text-6xl lg:text-7xl xl:text-8xl leading-[0.95] tracking-tight mb-6">
+          Autonomous rides,<br/>
+          <span class="gradient-text">delivered to you.</span>
+        </h1>
+        <p class="text-lg lg:text-xl text-gray-400 max-w-xl mb-10 leading-relaxed">
+          Step into the future of mobility. Tap once, and a self-driving vehicle arrives in minutes — no driver, no detours, no surprises.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <button class="btn-primary px-8 py-4 rounded-full font-semibold text-black flex items-center gap-2">
+            Request a ride
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </button>
+          <button class="px-8 py-4 rounded-full font-semibold glass hover:border-brand-cyan/30 transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            Watch the film
+          </button>
+        </div>
+
+        <!-- Booking widget -->
+        <div class="mt-12 glass rounded-2xl p-2 max-w-2xl">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+            <div class="sm:col-span-5 relative">
+              <div class="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-brand-cyan"></div>
+              <input type="text" placeholder="Pickup location" class="w-full bg-transparent pl-10 pr-4 py-4 text-sm text-white placeholder-gray-500 rounded-xl focus:bg-white/5 transition" />
+            </div>
+            <div class="sm:col-span-5 relative">
+              <div class="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-brand-violet"></div>
+              <input type="text" placeholder="Where to?" class="w-full bg-transparent pl-10 pr-4 py-4 text-sm text-white placeholder-gray-500 rounded-xl focus:bg-white/5 transition" />
+            </div>
+            <button class="sm:col-span-2 btn-primary rounded-xl font-semibold text-black py-4">Go</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 hidden lg:block">
+        <div class="glass rounded-3xl p-6 animate-float">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <div class="text-xs text-gray-500 uppercase tracking-wider">Arriving in</div>
+              <div class="font-display font-bold text-4xl gradient-text">4 min</div>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-brand-cyan/10 flex items-center justify-center">
+              <svg class="w-6 h-6 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 text-sm">
+              <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                <svg class="w-4 h-4 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              </div>
+              <div class="flex-1">
+                <div class="text-white font-medium">ROBO Model S</div>
+                <div class="text-xs text-gray-500">Autonomous · Electric</div>
+              </div>
+              <div class="text-brand-cyan font-semibold">★ 4.9</div>
+            </div>
+            <div class="h-px bg-white/5"></div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500">Distance</span>
+              <span class="text-white">1.2 km away</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500">Est. fare</span>
+              <span class="text-white font-semibold">$12.40</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500">CO₂ saved</span>
+              <span class="text-green-400 font-semibold">+2.1 kg</span>
+            </div>
+          </div>
+          <div class="mt-6 h-2 rounded-full bg-white/5 overflow-hidden">
+            <div class="h-full w-3/4 bg-gradient-to-r from-brand-cyan to-brand-blue rounded-full"></div>
+          </div>
+          <div class="flex justify-between text-xs text-gray-500 mt-2">
+            <span>En route</span>
+            <span>75%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 scroll-indicator">
+      <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- STATS TICKER -->
+<section class="border-y border-brand-line bg-brand-dark/50 backdrop-blur">
+  <div class="overflow-hidden">
+    <div class="flex ticker whitespace-nowrap py-6">
+      <div class="flex items-center gap-12 px-6">
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white counter" data-target="12">0</span><span class="text-gray-500 text-sm">Cities Live</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white counter" data-target="2.4">0</span><span class="text-gray-500 text-sm">Million Rides</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white counter" data-target="98">0</span><span class="text-gray-500 text-sm">% On-Time</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white counter" data-target="0">0</span><span class="text-gray-500 text-sm">Human Drivers</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white counter" data-target="45">0</span><span class="text-gray-500 text-sm">Million Miles</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+      </div>
+      <div class="flex items-center gap-12 px-6">
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white">12</span><span class="text-gray-500 text-sm">Cities Live</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white">2.4M</span><span class="text-gray-500 text-sm">Rides</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white">98%</span><span class="text-gray-500 text-sm">On-Time</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white">0</span><span class="text-gray-500 text-sm">Human Drivers</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+        <div class="flex items-center gap-3"><span class="font-display font-bold text-2xl text-white">45M</span><span class="text-gray-500 text-sm">Miles Driven</span></div>
+        <div class="w-px h-6 bg-brand-line"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="py-24 lg:py-32 relative">
+  <div class="absolute inset-0 grid-bg opacity-30"></div>
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 relative">
+    <div class="max-w-3xl mb-16 reveal">
+      <div class="text-xs font-semibold text-brand-cyan uppercase tracking-widest mb-4">How it works</div>
+      <h2 class="font-display font-bold text-4xl lg:text-6xl tracking-tight mb-6">Three taps.<br/><span class="gradient-text">Zero friction.</span></h2>
+      <p class="text-lg text-gray-400">Getting a ride has never been this simple. Our autonomous fleet is always on, always learning, always ready.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="glass-card rounded-3xl p-8 reveal">
+        <div class="flex items-center justify-between mb-8">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-cyan/20 to-brand-blue/20 border border-brand-cyan/20 flex items-center justify-center">
+            <svg class="w-7 h-7 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <span class="font-display font-bold text-5xl text-white/10">01</span>
+        </div>
+        <h3 class="font-display font-bold text-2xl mb-3">Set your destination</h3>
+        <p class="text-gray-400 leading-relaxed">Open the app, drop a pin or speak your destination. Our AI instantly maps the optimal route in real-time.</p>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8 reveal">
+        <div class="flex items-center justify-between mb-8">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-blue/20 to-brand-violet/20 border border-brand-blue/20 flex items-center justify-center">
+            <svg class="w-7 h-7 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <span class="font-display font-bold text-5xl text-white/10">02</span>
+        </div>
+        <h3 class="font-display font-bold text-2xl mb-3">Meet your ride</h3>
+        <p class="text-gray-400 leading-relaxed">A ROBO vehicle arrives in under 5 minutes. Unlock with your phone, step in, and buckle up — it's that easy.</p>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8 reveal">
+        <div class="flex items-center justify-between mb-8">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-violet/20 to-brand-cyan/20 border border-brand-violet/20 flex items-center justify-center">
+            <svg class="w-7 h-7 text-brand-violet" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <span class="font-display font-bold text-5xl text-white/10">03</span>
+        </div>
+        <h3 class="font-display font-bold text-2xl mb-3">Arrive in comfort</h3>
+        <p class="text-gray-400 leading-relaxed">Sit back, relax, or get work done. Our vehicles navigate safely while you enjoy the ride — or the silence.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLEET -->
+<section id="fleet" class="py-24 lg:py-32 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-[500px] h-[500px] radial-glow blur-3xl opacity-50"></div>
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 relative">
+    <div class="grid lg:grid-cols-2 gap-16 items-center mb-24 reveal">
+      <div>
+        <div class="text-xs font-semibold text-brand-cyan uppercase tracking-widest mb-4">The Fleet</div>
+        <h2 class="font-display font-bold text-4xl lg:text-6xl tracking-tight mb-6">Engineered for<br/><span class="gradient-text">autonomy.</span></h2>
+        <p class="text-lg text-gray-400 mb-8 leading-relaxed">Every ROBO vehicle is purpose-built from the ground up — no steering wheel, no pedals, just space designed around you.</p>
+        <div class="space-y-4">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-brand-cyan/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div>
+              <div class="font-semibold mb-1">360° LiDAR perception</div>
+              <div class="text-sm text-gray-500">Sees 360° around the vehicle, 250 meters in every direction.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </div>
+            <div>
+              <div class="font-semibold mb-1">Over-the-air updates</div>
+              <div class="text-sm text-gray-500">The fleet gets smarter every single night while you sleep.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-brand-violet/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-brand-violet" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div>
+              <div class="font-semibold mb-1">100% electric</div>
+              <div class="text-sm text-gray-500">Zero emissions. Every mile is a cleaner mile.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <div class="absolute -inset-4 bg-gradient-to-br from-brand-cyan/20 to-brand-violet/20 rounded-full blur-3xl"></div>
+        <img src="https://image.qwenlm.ai/public_source/29b2177f-d67e-4f1d-bd41-6da4068c1f21/1991de118-d585-4efc-b821-b3fd82d3803f.png" alt="ROBO Vehicle" class="relative rounded-3xl w-full animate-float" />
+      </div>
+    </div>
+
+    <!-- Interior -->
+    <div class="grid lg:grid-cols-2 gap-16 items-center reveal">
+      <div class="order-2 lg:order-1 relative">
+        <img src="https://image.qwenlm.ai/public_source/29b2177f-d67e-4f1d-bd41-6da4068c1f21/1a911fac1-c09e-4b08-a971-469485610292.png" alt="Interior" class="rounded-3xl w-full" />
+      </div>
+      <div class="order-1 lg:order-2">
+        <div class="text-xs font-semibold text-brand-violet uppercase tracking-widest mb-4">The Experience</div>
+        <h2 class="font-display font-bold text-4xl lg:text-5xl tracking-tight mb-6">Your space.<br/><span class="gradient-text">Your rules.</span></h2>
+        <p class="text-lg text-gray-400 mb-8 leading-relaxed">No small talk. No awkward eye contact. Just a private, climate-controlled cabin with ambient lighting, premium sound, and a panoramic display.</p>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="glass rounded-2xl p-5">
+            <div class="font-display font-bold text-3xl gradient-text mb-1">270°</div>
+            <div class="text-sm text-gray-400">Panoramic view</div>
+          </div>
+          <div class="glass rounded-2xl p-5">
+            <div class="font-display font-bold text-3xl gradient-text mb-1">4</div>
+            <div class="text-sm text-gray-400">Passenger seats</div>
+          </div>
+          <div class="glass rounded-2xl p-5">
+            <div class="font-display font-bold text-3xl gradient-text mb-1">WiFi</div>
+            <div class="text-sm text-gray-400">5G onboard</div>
+          </div>
+          <div class="glass rounded-2xl p-5">
+            <div class="font-display font-bold text-3xl gradient-text mb-1">∞</div>
+            <div class="text-sm text-gray-400">Playlist options</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SAFETY -->
+<section id="safety" class="py-24 lg:py-32 relative">
+  <div class="absolute inset-0 city-bg">
+    <img src="https://image.qwenlm.ai/public_source/29b2177f-d67e-4f1d-bd41-6da4068c1f21/1c80544d0-4a1e-4eb6-8268-07163cbd8df8.png" alt="" class="w-full h-full object-cover opacity-40" />
+  </div>
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 relative">
+    <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+      <div class="text-xs font-semibold text-brand-cyan uppercase tracking-widest mb-4">Safety First</div>
+      <h2 class="font-display font-bold text-4xl lg:text-6xl tracking-tight mb-6">The safest driver<br/><span class="gradient-text">is no driver.</span></h2>
+      <p class="text-lg text-gray-400">Human error causes 94% of accidents. Our autonomous system never gets tired, never gets distracted, and never breaks the rules.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="glass-card rounded-2xl p-6 reveal">
+        <div class="w-12 h-12 rounded-xl bg-brand-cyan/10 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        </div>
+        <div class="font-semibold mb-1">12 cameras</div>
+        <div class="text-sm text-gray-500">Full surround vision, day or night.</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal">
+        <div class="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <div class="font-semibold mb-1">Triple redundancy</div>
+        <div class="text-sm text-gray-500">Three independent systems, always.</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal">
+        <div class="w-12 h-12 rounded-xl bg-brand-violet/10 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-brand-violet" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div class="font-semibold mb-1">45M+ miles</div>
+        <div class="text-sm text-gray-500">Real-world validation, zero incidents.</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal">
+        <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+        </div>
+        <div class="font-semibold mb-1">Certified</div>
+        <div class="text-sm text-gray-500">Approved by national regulators.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CITIES -->
+<section id="cities" class="py-24 lg:py-32 relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-16 gap-6 reveal">
+      <div>
+        <div class="text-xs font-semibold text-brand-cyan uppercase tracking-widest mb-4">Where we operate</div>
+        <h2 class="font-display font-bold text-4xl lg:text-6xl tracking-tight">Available in <span class="gradient-text">12 cities</span></h2>
+      </div>
+      <p class="text-gray-400 max-w-md">Expanding rapidly. New cities added every quarter. Join the waitlist for your city below.</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div class="glass-card rounded-2xl p-6 reveal group cursor-pointer">
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-3xl">🇺</span>
+          <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+        </div>
+        <div class="font-display font-bold text-xl mb-1">San Francisco</div>
+        <div class="text-sm text-gray-500">Live since 2023</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal group cursor-pointer">
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-3xl">🇺🇸</span>
+          <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+        </div>
+        <div class="font-display font-bold text-xl mb-1">Austin</div>
+        <div class="text-sm text-gray-500">Live since 2023</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal group cursor-pointer">
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-3xl">🇺🇸</span>
+          <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+        </div>
+        <div class="font-display font-bold text-xl mb-1">Phoenix</div>
+        <div class="text-sm text-gray-500">Live since 2024</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal group cursor-pointer">
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-3xl">🇺🇸</span>
+          <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+        </div>
+        <div class="font-display font-bold text-xl mb-1">Los Angeles</div>
+        <div class="text-sm text-gray-500">Live since 2024</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal group cursor-pointer">
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-3xl">🇬🇧</span>
+          <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+        </div>
+        <div class="font-display font-bold text-xl mb-1">London</div>
+        <div class="text-sm text-gray-500">Live since 2024</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal group cursor-pointer">
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-3xl">🇦🇪</span>
+          <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+        </div>
+        <div class="font-display font-bold text-xl mb-1">Dubai</div>
+        <div class="text-sm text-gray-500">Live since 2025</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal group cursor-pointer">
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-3xl">🇬</span>
+          <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+        </div>
+        <div class="font-display font-bold text-xl mb-1">Singapore</div>
+        <div class="text-sm text-gray-500">Live since 2025</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 reveal group cursor-pointer border-dashed">
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-3xl">🌍</span>
+          <span class="w-2 h-2 rounded-full bg-brand-cyan pulse-dot"></span>
+        </div>
+        <div class="font-display font-bold text-xl mb-1">Your city</div>
+        <div class="text-sm text-brand-cyan">Join waitlist →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="py-24 lg:py-32 relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+      <div class="text-xs font-semibold text-brand-cyan uppercase tracking-widest mb-4">Loved by riders</div>
+      <h2 class="font-display font-bold text-4xl lg:text-6xl tracking-tight">What people are saying</h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="glass-card rounded-3xl p-8 reveal">
+        <div class="flex gap-1 mb-6">
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+        </div>
+        <p class="text-gray-300 leading-relaxed mb-6">"I take ROBO to work every morning. It's quieter than my own car, always on time, and I actually get work done during the commute."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-cyan to-brand-blue flex items-center justify-center font-bold text-black">SK</div>
+          <div>
+            <div class="font-semibold text-sm">Sarah K.</div>
+            <div class="text-xs text-gray-500">San Francisco · 142 rides</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8 reveal">
+        <div class="flex gap-1 mb-6">
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+        </div>
+        <p class="text-gray-300 leading-relaxed mb-6">"The first time I rode alone in a car with no driver, I was nervous. Now I can't imagine going back. It's like having a private chauffeur on demand."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-blue to-brand-violet flex items-center justify-center font-bold text-white">MR</div>
+          <div>
+            <div class="font-semibold text-sm">Marcus R.</div>
+            <div class="text-xs text-gray-500">Austin · 89 rides</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8 reveal">
+        <div class="flex gap-1 mb-6">
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+          <svg class="w-5 h-5 text-brand-cyan" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.293z"/></svg>
+        </div>
+        <p class="text-gray-300 leading-relaxed mb-6">"As someone who values privacy, ROBO is a game-changer. No small talk, no judgment, just a clean, quiet ride. Plus, the app is beautiful."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-violet to-brand-cyan flex items-center justify-center font-bold text-white">AL</div>
+          <div>
+            <div class="font-semibold text-sm">Aisha L.</div>
+            <div class="text-xs text-gray-500">London · 203 rides</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="about" class="py-24 lg:py-32 relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="relative rounded-3xl overflow-hidden reveal">
+      <div class="absolute inset-0 bg-gradient-to-br from-brand-cyan via-brand-blue to-brand-violet"></div>
+      <div class="absolute inset-0 grid-bg opacity-20"></div>
+      <div class="relative p-12 lg:p-20 text-center">
+        <h2 class="font-display font-bold text-4xl lg:text-7xl tracking-tight text-black mb-6">Ready to ride<br/>the future?</h2>
+        <p class="text-lg lg:text-xl text-black/70 max-w-2xl mx-auto mb-10">Download the ROBO app and get your first ride free. No driver required — just tap and go.</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <button class="bg-black text-white px-8 py-4 rounded-full font-semibold flex items-center gap-3 hover:scale-105 transition">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+            App Store
+          </button>
+          <button class="bg-black text-white px-8 py-4 rounded-full font-semibold flex items-center gap-3 hover:scale-105 transition">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 010 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.3 2.3-8.636-8.632z"/></svg>
+            Google Play
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-brand-line pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+      <div class="col-span-2">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-cyan to-brand-blue flex items-center justify-center">
+            <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <span class="font-display font-bold text-xl">ROBO</span>
+        </div>
+        <p class="text-gray-500 text-sm max-w-xs mb-6">Autonomous mobility for everyone. Building the safest, cleanest, most convenient transportation network on Earth.</p>
+        <div class="flex gap-3">
+          <a href="#" class="w-9 h-9 rounded-full glass flex items-center justify-center hover:border-brand-cyan/30 transition">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+          </a>
+          <a href="#" class="w-9 h-9 rounded-full glass flex items-center justify-center hover:border-brand-cyan/30 transition">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          </a>
+          <a href="#" class="w-9 h-9 rounded-full glass flex items-center justify-center hover:border-brand-cyan/30 transition">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="font-semibold mb-4 text-sm">Product</div>
+        <ul class="space-y-3 text-sm text-gray-500">
+          <li><a href="#" class="hover:text-brand-cyan transition">How it works</a></li>
+          <li><a href="#" class="hover:text-brand-cyan transition">Fleet</a></li>
+          <li><a href="#" class="hover:text-brand-cyan transition">Pricing</a></li>
+          <li><a href="#" class="hover:text-brand-cyan transition">Business</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-semibold mb-4 text-sm">Company</div>
+        <ul class="space-y-3 text-sm text-gray-500">
+          <li><a href="#" class="hover:text-brand-cyan transition">About</a></li>
+          <li><a href="#" class="hover:text-brand-cyan transition">Careers</a></li>
+          <li><a href="#" class="hover:text-brand-cyan transition">Press</a></li>
+          <li><a href="#" class="hover:text-brand-cyan transition">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-semibold mb-4 text-sm">Support</div>
+        <ul class="space-y-3 text-sm text-gray-500">
+          <li><a href="#" class="hover:text-brand-cyan transition">Help center</a></li>
+          <li><a href="#" class="hover:text-brand-cyan transition">Safety</a></li>
+          <li><a href="#" class="hover:text-brand-cyan transition">Contact</a></li>
+          <li><a href="#" class="hover:text-brand-cyan transition">Status</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="pt-8 border-t border-brand-line flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm text-gray-500">© 2026 ROBO Mobility Inc. All rights reserved.</div>
+      <div class="flex gap-6 text-sm text-gray-500">
+        <a href="#" class="hover:text-brand-cyan transition">Privacy</a>
+        <a href="#" class="hover:text-brand-cyan transition">Terms</a>
+        <a href="#" class="hover:text-brand-cyan transition">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Navbar scroll effect
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 50) {
+    navbar.classList.add('glass');
+  } else {
+    navbar.classList.remove('glass');
+  }
+});
+
+// Reveal on scroll
+const revealElements = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+revealElements.forEach(el => observer.observe(el));
+
+// Counter animation
+const counters = document.querySelectorAll('.counter');
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const target = parseFloat(el.dataset.target);
+      const isDecimal = target % 1 !== 0;
+      const duration = 2000;
+      const start = performance.now();
+      const animate = (now) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = target * eased;
+        if (isDecimal) {
+          el.textContent = current.toFixed(1) + 'M';
+        } else if (target === 0) {
+          el.textContent = '0';
+        } else {
+          el.textContent = Math.floor(current);
+        }
+        if (progress < 1) requestAnimationFrame(animate);
+      };
+      requestAnimationFrame(animate);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+counters.forEach(c => counterObserver.observe(c));
+
+// Booking widget interaction
+const goBtn = document.querySelector('.btn-primary.rounded-xl');
+if (goBtn) {
+  goBtn.addEventListener('click', () => {
+    const inputs = document.querySelectorAll('input[type="text"]');
+    const pickup = inputs[0].value.trim();
+    const dropoff = inputs[1].value.trim();
+    if (!pickup || !dropoff) {
+      inputs.forEach(i => {
+        if (!i.value.trim()) {
+          i.classList.add('border', 'border-red-500/50');
+          setTimeout(() => i.classList.remove('border', 'border-red-500/50'), 1500);
+        }
+      });
+      return;
+    }
+    goBtn.textContent = 'Searching...';
+    setTimeout(() => {
+      goBtn.textContent = 'Found!';
+      goBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+      setTimeout(() => {
+        goBtn.textContent = 'Go';
+        goBtn.style.background = '';
+        inputs.forEach(i => i.value = '');
+      }, 1500);
+    }, 1200);
+  });
+}
+</script>
+
+</body>
+</html>
+
